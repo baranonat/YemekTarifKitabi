@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/listeFragment"
-        android:name="com.baranonat.yemektarifkitabi.ListeFragment"
+        android:name="com.baranonat.yemektarifkitabi.view.ListeFragment"
         android:label="fragment_liste"
         tools:layout="@layout/fragment_liste" >
         <action
@@ -16,7 +16,17 @@
     </fragment>
     <fragment
         android:id="@+id/tarifFragment"
-        android:name="com.baranonat.yemektarifkitabi.TarifFragment"
+        android:name="com.baranonat.yemektarifkitabi.view.TarifFragment"
         android:label="fragment_tarif"
-        tools:layout="@layout/fragment_tarif" />
+        tools:layout="@layout/fragment_tarif" >
+        <action
+            android:id="@+id/action_tarifFragment_to_listeFragment"
+            app:destination="@id/listeFragment" />
+        <argument
+            android:name="bilgi"
+            app:argType="string" />
+        <argument
+            android:name="id"
+            app:argType="integer" />
+    </fragment>
 </navigation>
