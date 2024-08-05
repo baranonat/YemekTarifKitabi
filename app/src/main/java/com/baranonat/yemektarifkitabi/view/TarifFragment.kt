@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -44,6 +45,7 @@ class TarifFragment : Fragment() {
     private lateinit var db:TarifDatabase
     private lateinit var tarifDao:TarifDao
     private val mDisposable=CompositeDisposable()
+    private var tarifListe:Tarif?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,22 +73,33 @@ class TarifFragment : Fragment() {
 
             val bilgi=TarifFragmentArgs.fromBundle(it).bilgi
             if(bilgi=="yeni"){
+            binding.silButton.isEnabled=false
                 binding.kaydetButton.isEnabled=true
-                binding.silButton.isEnabled=false
+                binding.isimText.setText("")
+                binding.malzemeText.setText("")
             }else{
-                binding.kaydetButton.isEnabled=false
                 binding.silButton.isEnabled=true
+                binding.kaydetButton.isEnabled=false
+             val id=TarifFragmentArgs.fromBundle(it).id
+                mDisposable.add(
+                    tarifDao.findById(id)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::handleResponse)
+
+                )
             }
-
-
 
         }
 
     }
+    fun handleResponse(tarif:Tarif){
+        val bitmap=BitmapFactory.decodeByteArray(tarif.gorsel,0,tarif.gorsel.size)
+        binding.imageView.setImageBitmap(bitmap)
+       binding.isimText.setText(tarif.isim)
+        binding.malzemeText.setText(tarif.malzeme)
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+            tarifListe=tarif
     }
 
     fun gorselSec(view: View) {
@@ -239,6 +252,15 @@ class TarifFragment : Fragment() {
     }
 
     fun sil(view: View) {
+        if(tarifListe!=null){
+            mDisposable.add(
+                tarifDao.delete(tarifListe!!)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::handleResponseInsertAll)
+
+            )
+        }
 
 
     }
@@ -259,7 +281,12 @@ class TarifFragment : Fragment() {
             width=kucultulmusGenislik.toInt()
         }
 
-        return Bitmap.createScaledBitmap(kullanicininSectigiBitmap, 100, 100, true)
+        return Bitmap.createScaledBitmap(kullanicininSectigiBitmap, width, height, true)
 
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        mDisposable.clear()
     }
 }

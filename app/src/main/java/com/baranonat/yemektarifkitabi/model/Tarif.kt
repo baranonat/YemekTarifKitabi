@@ -14,6 +14,7 @@ data class Tarif(
     val gorsel:ByteArray
 
 
+
 ){
     @PrimaryKey(autoGenerate = true)
     var id=0
